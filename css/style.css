@@ -1,0 +1,21 @@
+
+.goblinFace {
+    background-image: url(../img/goblin.png);
+}
+
+.game-widget {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 600px;
+    height: 600px;
+}
+
+.cell-item {
+    margin: 5px;
+    background-color: #999;
+    width: calc(25% - 5 * 5px);
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
