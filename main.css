@@ -1,0 +1,105 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+}
+
+.container {
+    padding: 10px;
+    width: 1080px;
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    background-color: #107abb;
+
+}
+
+.column {
+    width: 33%;
+    border-radius: 3px;
+    margin: 3px 3px 3px 3px;
+    padding: 8px;
+    background-color: #dee2e5;
+}
+
+.fill-form-hidden {
+    display: none;
+}
+
+.add-card-hidden {
+    display: none;
+}
+
+.fill-card-textarea {
+    box-sizing: border-box;
+    resize: none;
+    overflow: auto;
+    width: 100%;
+    min-height: 60px;
+    padding: 8px;
+    margin-bottom: 6px;
+    border: none;
+    border-radius: 3px;
+}
+
+.button-cancel {
+    width: 30px;
+    height: 30px;
+    border-radius: 3px;
+    border: 1px solid black;
+    opacity: .3;
+}
+
+.button-add-card {
+    width: 90px;
+    height: 30px;
+    border-radius: 3px;
+    background-color: #5ca84d;
+    border: 1px solid #426d2c;
+}
+
+.content-item {
+    margin-bottom: 5px;
+    padding: 8px;
+    display: flex;
+    justify-content: space-between;
+    border-radius: 3px;
+    background-color: #ffffff;
+    min-height: 30px;
+
+}
+
+.empty-item {
+    margin-bottom: 5px;
+    padding: 8px;
+    display: flex;
+    justify-content: space-between;
+    border-radius: 3px;
+    background-color: #dee2e5;
+    min-height: 30px;
+}
+
+.content-item-text {
+    word-break: break-all;
+}
+
+.content-item-del-hide {
+    display: none;
+}
+
+.content-item-del {
+    background-color: #eaedef;
+    width: 27px;
+    height: 27px;
+    border-radius: 3px;
+    text-align: center; 
+}
+
+.content-item.dragged{
+    z-index: 999;
+    pointer-events: none;
+    position: absolute;
+   }
+
+/*# sourceMappingURL=main.css.map*/
