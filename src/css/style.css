@@ -61,11 +61,27 @@ body {
 
 .content-item {
     margin-bottom: 5px;
-    padding:8px;
+    padding: 8px;
     display: flex;
     justify-content: space-between;
     border-radius: 3px;
     background-color: #ffffff;
+    min-height: 30px;
+
+}
+
+.empty-item {
+    margin-bottom: 5px;
+    padding: 8px;
+    display: flex;
+    justify-content: space-between;
+    border-radius: 3px;
+    background-color: #dee2e5;
+    min-height: 30px;
+}
+
+.content-item-text {
+    word-break: break-all;
 }
 
 .content-item-del-hide {
@@ -84,6 +100,4 @@ body {
     z-index: 999;
     pointer-events: none;
     position: absolute;
-    /*min-height: 33px;
-    min-width: 133px;*/
-}
+   }

@@ -1,4 +1,6 @@
 "use strict";
+import SaveLoadUtils from "./SaveLoadUtils";
+import Item from "./Item";
 
 export default class Trello {
     constructor() {
@@ -14,23 +16,20 @@ export default class Trello {
         this.container = document.querySelector('.container');
         this.containerMouseOver = this.containerMouseOver.bind(this);
         this.containerMouseOver();
-        this.containermouseout = this.containermouseout.bind(this);
-        this.containermouseout();
-        this.containermousemousedown = this.containermousemousedown.bind(this);
-        this.containermousemousedown();
+        this.containerMouseOut = this.containerMouseOut.bind(this);
+        this.containerMouseOut();
+        this.containerMouseDown = this.containerMouseDown.bind(this);
+        this.containerMouseDown();
 
-        const columns = ['todo', 'inProgress', 'done'];
+        this.containerMouseDownFunction = this.containerMouseDownFunction.bind(this);
+        this.containerMouseOutFunction = this.containerMouseOutFunction.bind(this);
+        this.containerMouseOverFunction = this.containerMouseOverFunction.bind(this);
+        this.containerMouseUpFunction = this.containerMouseUpFunction.bind(this);
+        this.containerMouseUp = this.containerMouseUp.bind(this);
+        this.containerMouseUp();
+        SaveLoadUtils.load(this);
+        this.targetElement = null;
 
-        columns.forEach(columnID => {
-            if (localStorage.getItem(columnID) !== null) {
-                const items = JSON.parse(localStorage.getItem(columnID));
-                items.forEach(item => {
-                    columnID = columnID;
-                    const columnContent = document.getElementById(columnID).querySelector('.column-content');
-                    this.addTextElement(item, columnContent);
-                });
-            }
-        });
     }
 
     addCardClick() {
@@ -56,37 +55,19 @@ export default class Trello {
                 console.log("Добавление элемента");
                 const columnContent = event.target.closest(".column").querySelector('.column-content');
                 const itemValue = event.target.closest('.fill-form').querySelector(".fill-card-textarea").value;
-                this.addTextElement(itemValue, columnContent);
+                Item.addTextElement(itemValue, columnContent);
                 event.target.closest('.fill-form').querySelector(".fill-card-textarea").value = '';
                 this.showHideAddForm(event.target);
-                this.save();
+                SaveLoadUtils.save();
             });
         });
     }
 
-    addTextElement(itemValue, columnContent) {
-        const newItem = document.createElement("div");
-        newItem.classList.add("content-item");
-        columnContent.appendChild(newItem);
-
-        const newItemText = document.createElement("div");
-        newItemText.textContent = itemValue;
-        newItemText.classList.add("content-item-text");
-        newItem.appendChild(newItemText);
-
-        const newItemDel = document.createElement("div");
-        newItemDel.innerHTML = '&#951';
-        newItemDel.classList.add("content-item-del");
-        newItemDel.classList.add("content-item-del-hide");
-        newItem.appendChild(newItemDel);
-    }
 
     buttonCancelClick() {
         this.buttonCancel.forEach((el) => {
             el.addEventListener('click', (event) => {
                 event.preventDefault();
-                console.log("Очищение формы элемента");
-
                 event.target.closest('.fill-form').querySelector(".fill-card-textarea").value = '';
                 this.showHideAddForm(event.target);
             });
@@ -94,111 +75,117 @@ export default class Trello {
     }
 
     containerMouseOver() {
-        this.container.addEventListener('mouseover', (event) => {
-            const contentItem = event.target.closest('.content-item');
-            if (contentItem) {
-                const contentItemDel = contentItem.querySelector(".content-item-del");
-                if (contentItemDel.classList.contains('content-item-del-hide')) {
-                    contentItemDel.classList.remove('content-item-del-hide');
-                }
-                contentItemDel.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    console.log("Удаляем элемент");
-                    event.target.removeEventListener('click', this.logRemoveEventListener);
-                    contentItem.remove();
-                    this.save();
-                });
-            }
-            if (this.actualElement != undefined) {
-                this.actualElement.style.top = event.clientY + 'px';
-                this.actualElement.style.left = event.clientX + 'px';
-            }
-
-        });
+        this.container.addEventListener('mouseover', this.containerMouseOverFunction.bind(this));
     }
 
-    containermouseout() {
-        this.container.addEventListener('mouseout', (event) => {
-            if (event.target.classList.contains('content-item')) {
-                const contentItemDel = event.target.querySelector(".content-item-del");
-                contentItemDel.classList.add('content-item-del-hide');
+    containerMouseOverFunction(event) {
+        const contentItem = event.target.closest('.content-item');
+        if (contentItem) {
+            const contentItemDel = contentItem.querySelector(".content-item-del");
+            if (contentItemDel.classList.contains('content-item-del-hide')) {
+                contentItemDel.classList.remove('content-item-del-hide');
             }
-        })
-    }
-
-    logRemoveEventListener() {
-        console.log("Удалена подписка на событие");
-    }
-
-
-    containermousemousedown() {
-        this.container.addEventListener('mousedown', (event) => {
-
-            if (this.actualElement != undefined) { return };
-            if ((event.target.classList.contains('content-item')) || (event.target.classList.contains('content-item-text'))) {
-                const contentItem = event.target.closest('.content-item');
-
+            contentItemDel.addEventListener('click', (event) => {
                 event.preventDefault();
-                this.actualElement = contentItem;
-                const rectActualElement = contentItem.getBoundingClientRect();
-                this.actualElement.classList.add('dragged');
-                this.actualElement.style["min-width"] = rectActualElement.width;
-                this.actualElement.style["min-height"] = rectActualElement.height;
-                document.body.style.cursor = "grabbing";
-
-                this.containerMouseUp();
-                this.containerMouseOver();
-
+                contentItem.remove();
+                SaveLoadUtils.save();
+            });
+        }
+        if ((this.actualElement != undefined) && (this.targetElement === null) && (event.relatedTarget) && (event.relatedTarget != event.target)) {
+            if (contentItem === null) {
+                const column = event.target.closest('.column');
+                if (column) {
+                    this.targetElement = Item.addEmptyElement(this.actualElement, column);
+                    this.oldRelatedTarget = event.relatedTarget;
+                }
+            } else {
+                this.targetElement = Item.addEmptyElement(this.actualElement, contentItem);
+                this.oldRelatedTarget = event.relatedTarget;
             }
-        })
+
+        }
+        if (this.actualElement != undefined) {
+            this.actualElement.style.top = event.clientY - this.difY + 'px';
+            this.actualElement.style.left = event.clientX - this.difX + 'px';
+        }
     }
 
-    onMouseOver = (e) => {
-        console.log(e);
-    };
+    containerMouseOut() {
+        this.container.addEventListener('mouseout', this.containerMouseOutFunction.bind(this))
+    }
+
+    containerMouseOutFunction(event) {
+        let contentItem = event.target.closest('.content-item');
+        if (contentItem != null) {
+            const contentItemDel = contentItem.querySelector(".content-item-del");
+            contentItemDel.classList.add('content-item-del-hide');
+        }
+        ;
+        if ((this.actualElement != undefined) && (this.targetElement != null) && (event.relatedTarget)
+            && (event.relatedTarget != this.oldRelatedTarget) && (event.relatedTarget != this.targetElement)) {
+            this.targetElement.remove();
+            this.targetElement = null;
+        } {
+        }
+    }
+
+    containerMouseDown() {
+        let containerMouseDownFunction = this.containerMouseDownFunction.bind(this);
+        this.container.addEventListener('mousedown', containerMouseDownFunction)
+    }
+
+    containerMouseDownFunction(event) {
+
+        if (this.actualElement != undefined) { return };
+        if ((event.target.classList.contains('content-item')) || (event.target.classList.contains('content-item-text'))) {
+            const contentItem = event.target.closest('.content-item');
+
+            event.preventDefault();
+            this.actualElement = contentItem;
+            const rectActualElement = contentItem.getBoundingClientRect();
+
+            this.actualElement.style.width = rectActualElement.width + 'px';
+            this.actualElement.style.height = rectActualElement.height + 'px';
+            this.difX = event.clientX - rectActualElement.x;
+            this.difY = event.clientY - rectActualElement.y;
+            this.actualElement.classList.add('dragged');
+            document.body.style.cursor = "grabbing";
+        }
+    }
+
 
     containerMouseUp() {
-
-        this.container.addEventListener('mouseup', (event) => {
-            if (this.actualElement === undefined) { return };
-            const mouseUpItem = event.target.closest('.content-item');
-            const contentParent = event.target.closest('.column').querySelector('.column-content');
-            if (contentParent != null) {
-                if (mouseUpItem === null) {
-                    contentParent.appendChild(this.actualElement);
-                } else {
-                    contentParent.insertBefore(this.actualElement, mouseUpItem);
-                }
-                this.actualElement.classList.remove('dragged');
-                this.actualElement = undefined;
-                document.body.style.cursor = "auto";
-                this.container.removeEventListener('mouseup', this.onMouseOver);
-                this.container.removeEventListener('mouseover', this.onMouseOver);
-                this.save();
-            }
-        });
+        let containerMouseUpFunction = this.containerMouseUpFunction.bind(this);
+        this.container.addEventListener('mouseup', containerMouseUpFunction);
     }
 
-    static load() {
-        return localStorage.getItem("cards");
-    }
+    containerMouseUpFunction(event) {
+        if (this.actualElement === undefined) { return };
+        const mouseUpColumn = event.target.closest('.column');
+        if (mouseUpColumn != null) {
+            const contentParent = mouseUpColumn.querySelector('.column-content');
 
-    save() {
-        const column = document.querySelectorAll('.column');
-        column.forEach((element) => {
-            const content = element.querySelectorAll('.content-item-text');
-            const arrayOfValues = [];
-            for (const valueText of content) {
-                arrayOfValues.push(valueText.textContent);
+            const closestItem = event.target.closest('.content-item');
+            let mouseUpItem = closestItem;
+            if ((event.target.closest('.content-item') === this.targetElement) && ((mouseUpItem != null))) {
+                mouseUpItem = closestItem.nextSibling;
             }
-            if (element.id === 'todo') {
-                localStorage.setItem("todo", JSON.stringify(arrayOfValues));
-            } else if (element.id === 'inProgress') {
-                localStorage.setItem("inProgress", JSON.stringify(arrayOfValues));
-            } else if (element.id === 'done') {
-                localStorage.setItem("done", JSON.stringify(arrayOfValues));
+            if (mouseUpItem === null) {
+                contentParent.appendChild(this.actualElement);
+            } else {
+                contentParent.insertBefore(this.actualElement, mouseUpItem);
             }
-        })
+            this.actualElement.classList.remove('dragged');
+            this.actualElement.style.width = '';
+            this.actualElement.style.height = '';
+            this.actualElement = undefined;
+            document.body.style.cursor = "auto";
+            if ((this.targetElement != null)) {
+                this.targetElement.remove();
+                this.targetElement = null;
+            }
+            SaveLoadUtils.save();
+        }
     }
 }
 
