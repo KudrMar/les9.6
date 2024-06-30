@@ -1,6 +1,5 @@
-module.exports =  {
-    // ...other config
-    
-    ignore: ["dist/*", "coverage/*", "doc/*"]
-    
-};
+module.exports = [
+    {
+        ignores: ["dist/*", "coverage/*", "doc/*"],
+    }
+];
