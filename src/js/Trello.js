@@ -181,16 +181,25 @@ export default class Trello {
         if (mouseUpColumn != null) {
             const contentParent = mouseUpColumn.querySelector('.column-content');
 
-            const closestItem = event.target.closest('.content-item');
-            let mouseUpItem = closestItem;
-            if ((event.target.closest('.content-item') === this.targetElement) && ((mouseUpItem != null))) {
-                mouseUpItem = closestItem.nextSibling;
-            }
-            if (mouseUpItem === null) {
-                contentParent.appendChild(this.actualElement);
-            } else {
+            const mouseUpItem = event.target.closest('.content-item');
+            const emptyItem = event.target.closest('.empty-item');
+            if (emptyItem) {
+                contentParent.insertBefore(this.actualElement, emptyItem);
+            } else if (mouseUpItem) {
                 contentParent.insertBefore(this.actualElement, mouseUpItem);
-            }
+            } else {
+                const header = event.target.closest('.column-header');
+                let elitem = null;
+                if (header) {
+                    elitem = header.nextElementSibling.querySelector('.content-item');
+                }
+                if (elitem) {
+                    contentParent.insertBefore(this.actualElement, elitem);
+                } else {
+                    contentParent.appendChild(this.actualElement);
+                }
+            } 
+            
             this.actualElement.classList.remove('dragged');
             this.actualElement.style.width = '';
             this.actualElement.style.height = '';
@@ -201,6 +210,10 @@ export default class Trello {
                 this.targetElement = null;
             }
             SaveLoadUtils.save();
+        } else {
+            this.actualElement.classList.remove('dragged');
+            document.body.style.cursor = "auto";
+            this.actualElement = undefined;
         }
     }
 }
