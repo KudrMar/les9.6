@@ -109,8 +109,7 @@ export default class Trello {
             && (event.relatedTarget != this.oldRelatedTarget) && (event.relatedTarget != this.targetElement)) {
             this.targetElement.remove();
             this.targetElement = null;
-        } {
-        }
+        } 
     }
 
     containerMouseDown() {
