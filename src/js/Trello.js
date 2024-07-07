@@ -127,7 +127,7 @@ export default class Trello {
             const rectActualElement = contentItem.getBoundingClientRect();
 
             this.actualElement.style.width = rectActualElement.width - 16 + 'px';
-            this.actualElement.style.height = rectActualElement.height + 'px';
+            this.actualElement.style.height = rectActualElement.height - 16 + 'px';
             this.difX = event.clientX - rectActualElement.x;
             this.difY = event.clientY - rectActualElement.y;
             this.actualElement.classList.add('dragged');
