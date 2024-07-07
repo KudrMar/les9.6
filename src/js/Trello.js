@@ -92,18 +92,6 @@ export default class Trello {
                 SaveLoadUtils.save();
             });
         }
-        if ((this.actualElement != undefined) && (this.targetElement === null) && (event.relatedTarget) && (event.relatedTarget != event.target)) {
-            if (contentItem === null) {
-                const column = event.target.closest('.column');
-                if (column) {
-                    this.targetElement = Item.addEmptyElement(this.actualElement, column);
-                    this.oldRelatedTarget = event.relatedTarget;
-                }
-            } else {
-                this.targetElement = Item.addEmptyElement(this.actualElement, contentItem);
-                this.oldRelatedTarget = event.relatedTarget;
-            }
-        }
     }
 
     containerMouseOut() {
@@ -158,6 +146,30 @@ export default class Trello {
         if (this.actualElement != undefined) {
             this.actualElement.style.top = event.clientY - this.difY + 'px';
             this.actualElement.style.left = event.clientX - this.difX + 'px';
+        }
+        const contentItem = event.target.closest('.content-item');
+        if ((this.actualElement != undefined) && (this.targetElement === null) && (event.target != null)) {
+            if (contentItem === null) {
+                const header = event.target.closest('.column-header');
+                let elitem = null;
+                if (header) {
+                    elitem = header.nextElementSibling.querySelector('.content-item');
+                }
+                
+               if (elitem) {
+                    this.targetElement = Item.addEmptyElement(this.actualElement, elitem);
+                    this.oldRelatedTarget = event.relatedTarget;
+                } else {
+                    const column = event.target.closest('.column');
+                    if (column) {
+                        this.targetElement = Item.addEmptyElement(this.actualElement, column);
+                        this.oldRelatedTarget = event.relatedTarget;
+                    }
+                }
+            } else {
+                this.targetElement = Item.addEmptyElement(this.actualElement, contentItem);
+                this.oldRelatedTarget = event.relatedTarget;
+            }
         }
 
     }
