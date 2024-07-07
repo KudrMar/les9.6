@@ -106,10 +106,10 @@ export default class Trello {
         }
         ;
         if ((this.actualElement != undefined) && (this.targetElement != null) && (event.relatedTarget)
-            && (event.relatedTarget != this.oldRelatedTarget) && (event.relatedTarget != this.targetElement)) {
+            && (event.relatedTarget != this.targetElement)) {
             this.targetElement.remove();
             this.targetElement = null;
-        } 
+        }
     }
 
     containerMouseDown() {
@@ -154,20 +154,17 @@ export default class Trello {
                 if (header) {
                     elitem = header.nextElementSibling.querySelector('.content-item');
                 }
-                
-               if (elitem) {
+
+                if (elitem) {
                     this.targetElement = Item.addEmptyElement(this.actualElement, elitem);
-                    this.oldRelatedTarget = event.relatedTarget;
                 } else {
                     const column = event.target.closest('.column');
                     if (column) {
                         this.targetElement = Item.addEmptyElement(this.actualElement, column);
-                        this.oldRelatedTarget = event.relatedTarget;
                     }
                 }
             } else {
                 this.targetElement = Item.addEmptyElement(this.actualElement, contentItem);
-                this.oldRelatedTarget = event.relatedTarget;
             }
         }
 
