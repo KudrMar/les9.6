@@ -20,7 +20,8 @@ export default class Trello {
         this.containerMouseOut();
         this.containerMouseDown = this.containerMouseDown.bind(this);
         this.containerMouseDown();
-
+        this.containerMouseMove = this.containerMouseMove.bind(this);
+        this.containerMouseMove();
         this.containerMouseDownFunction = this.containerMouseDownFunction.bind(this);
         this.containerMouseOutFunction = this.containerMouseOutFunction.bind(this);
         this.containerMouseOverFunction = this.containerMouseOverFunction.bind(this);
@@ -102,11 +103,6 @@ export default class Trello {
                 this.targetElement = Item.addEmptyElement(this.actualElement, contentItem);
                 this.oldRelatedTarget = event.relatedTarget;
             }
-
-        }
-        if (this.actualElement != undefined) {
-            this.actualElement.style.top = event.clientY - this.difY + 'px';
-            this.actualElement.style.left = event.clientX - this.difX + 'px';
         }
     }
 
@@ -135,7 +131,6 @@ export default class Trello {
     }
 
     containerMouseDownFunction(event) {
-
         if (this.actualElement != undefined) { return };
         if ((event.target.classList.contains('content-item')) || (event.target.classList.contains('content-item-text'))) {
             const contentItem = event.target.closest('.content-item');
@@ -144,15 +139,28 @@ export default class Trello {
             this.actualElement = contentItem;
             const rectActualElement = contentItem.getBoundingClientRect();
 
-            this.actualElement.style.width = rectActualElement.width + 'px';
+            this.actualElement.style.width = rectActualElement.width - 16 + 'px';
             this.actualElement.style.height = rectActualElement.height + 'px';
             this.difX = event.clientX - rectActualElement.x;
             this.difY = event.clientY - rectActualElement.y;
             this.actualElement.classList.add('dragged');
             document.body.style.cursor = "grabbing";
         }
+
     }
 
+    containerMouseMove() {
+        let containerMouseMoveFunction = this.containerMouseMoveFunction.bind(this);
+        this.container.addEventListener('mousemove', containerMouseMoveFunction)
+    }
+
+    containerMouseMoveFunction(event) {
+        if (this.actualElement != undefined) {
+            this.actualElement.style.top = event.clientY - this.difY + 'px';
+            this.actualElement.style.left = event.clientX - this.difX + 'px';
+        }
+
+    }
 
     containerMouseUp() {
         let containerMouseUpFunction = this.containerMouseUpFunction.bind(this);
